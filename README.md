@@ -1,1 +1,1 @@
-# gpt-generated-obect-couter
+# gpt-generated-object-couter
