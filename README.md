@@ -1,1 +1,1 @@
-# gpt-generated-object-couter
+# gpt-generated-object-counter
