@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Object Detection using TensorFlow.js</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+  </head>
+  <body>
+    <h1>Object Detection using TensorFlow.js</h1>
+    <input type="file" id="imageUpload">
+    <div style="position: relative; display: inline-block;">
+      <img id="image" src="#" alt="uploaded image" width="400">
+      <canvas id="canvas" style="position: absolute; left: 0; top: 0;"></canvas>
+    </div>
+    <br><br>
+    <button id="detectButton">Detect Objects</button>
+    <p id="objectCount"></p>
+
+    <script>
+      // Load the Coco-SSD model
+      async function loadModel() {
+        const model = await cocoSsd.load();
+        return model;
+      }
+
+      // Detect objects in the image
+      async function detectObjects(model) {
+        const img = document.getElementById('image');
+        const predictions = await model.detect(img);
+        return predictions;
+      }
+
+      // Count the number of objects detected
+      function countObjects(predictions) {
+        const count = predictions.length;
+        return count;
+      }
+
+      // Display the number of objects detected
+      function displayObjectCount(count) {
+        const objectCountElement = document.getElementById('objectCount');
+        objectCountElement.innerText = `Number of objects detected: ${count}`;
+      }
+
+      // Draw boxes around detected objects and label them
+      function drawBoxes(predictions) {
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        predictions.forEach(prediction => {
+          const [x, y, width, height] = prediction.bbox;
+          const text = prediction.class;
+          ctx.strokeStyle = 'red';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(x, y, width, height);
+          ctx.font = '16px Arial';
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(x, y - 20, ctx.measureText(text).width + 10, 20);
+          ctx.fillStyle = '#000000';
+          ctx.fillText(text, x, y - 5);
+        });
+      }
+
+      // Load the model when the page loads
+      let model;
+      async function initialize() {
+        model = await loadModel();
+      }
+      initialize();
+
+      // Detect objects and display count and boxes when button is clicked
+      const detectButton = document.getElementById('detectButton');
+      detectButton.addEventListener('click', async function() {
+        const predictions = await detectObjects(model);
+        const count = countObjects(predictions);
+        displayObjectCount(count);
+        drawBoxes(predictions);
+      });
+
+      // Load image when selected by user
+      const imageUpload = document.getElementById('imageUpload');
+      imageUpload.addEventListener('change', function() {
+        const file = imageUpload.files[0];
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = function() {
+          const dataURL = reader.result;
+          const image = document.getElementById('image');
+          image.onload = function() {
+            const canvas = document.getElementById('canvas');
+            canvas.width = image.width;
+            canvas.height = image.height;
+          };
+          image.src = dataURL;
+        };
+      });
+    </script>
+  </body>
+</html>
