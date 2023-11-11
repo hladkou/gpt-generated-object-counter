@@ -1,1 +1,1 @@
-# gpt_generated_object_counter
+# gpt-generated-object-counter
